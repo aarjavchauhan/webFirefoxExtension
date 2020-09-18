@@ -1,7 +1,3 @@
-
-
-
-
 * Data visualization on people browsing the web
 
 * [GitHub - aarjavchauhan/web_visualization: Visualization of my browsing behaviors using D3JS](https://github.com/aarjavchauhan/web_visualization)
@@ -20,4 +16,22 @@
 
 * Check out how the extension would work
 
- 
+
+
+### After chatting
+
+* CRUD like stuff
+
+* Potential Indicator
+
+* Turn it on / enable
+  
+  * Enable disable
+
+* Add Pop functionality to delete websites
+
+* Save button to save the urls to a potential local file.
+
+Q. How should data look like.
+
+A. URL's, potentially DateTime when they visitied.
