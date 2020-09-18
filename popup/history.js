@@ -58,3 +58,15 @@ getActiveTab().then((tabs) => {
   });
 });
 
+var state = 0;
+
+document.addEventListener("click", (e) => {
+	//document.getElementById("button-cont").setAttribute("class", "button stop");
+	if (e.target.classList.contains("start")) {	
+		document.getElementById("button-start-stop").setAttribute("class", "button stop");
+		document.getElementById("button-start-stop").innerText = "Stop";
+	} else if (e.target.classList.contains("stop")) {
+		document.getElementById("button-start-stop").setAttribute("class", "button start");
+		document.getElementById("button-start-stop").innerText = "Start";
+	}
+});

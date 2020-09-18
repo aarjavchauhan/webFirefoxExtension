@@ -1,0 +1,51 @@
+html, body {
+  width: auto;
+}
+
+.hidden {
+  display: none;
+}
+
+.button {
+  margin: 3% auto;
+  padding: 4px;
+  width: 100px;
+  text-align: center;
+  font-size: 1.5em;
+  cursor: pointer;
+}
+
+.start {
+  background-color: #4caf50;
+}
+
+.start:hover {
+  background-color: #81c784;
+}
+
+.stop {
+  background-color: #f44336;
+}
+
+.stop:hover {
+  background-color: #e57373;
+}
+
+.reset {
+  background-color: #FBFBC9;
+}
+
+.reset:hover {
+  background-color: #EAEA9D;
+}
+
+.row {
+      width: 80%;
+      background: gray;
+      text-align: center;
+    }
+.col {
+      width: 33.3%;
+      float: left;
+      background: orange;
+}
