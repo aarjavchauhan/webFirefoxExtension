@@ -32,10 +32,11 @@ getActiveTab().then((tabs) => {
 
   // Search for all history entries for the current windows domain.
   // Because this could be a lot of entries, lets limit it to 5.
+
   var searchingHistory = browser.history.search(
     {text: "http", 
-     startTime: 1583042400000,
-     endTime: 1585717200000,
+     startTime: startTime,
+     endTime: Date.now(),
      maxResults: 50
      });
   searchingHistory.then((results) => {
@@ -58,15 +59,32 @@ getActiveTab().then((tabs) => {
   });
 });
 
-var state = 0;
-
+var startTime = 0;
+ 
 document.addEventListener("click", (e) => {
-	//document.getElementById("button-cont").setAttribute("class", "button stop");
-	if (e.target.classList.contains("start")) {	
+
+	if (e.target.classList.contains("start")) { // State:Start, new->Stop
+	
 		document.getElementById("button-start-stop").setAttribute("class", "button stop");
 		document.getElementById("button-start-stop").innerText = "Stop";
-	} else if (e.target.classList.contains("stop")) {
-		document.getElementById("button-start-stop").setAttribute("class", "button start");
+
+		document.getElementById("helper-1").innerText = "Visited Websites : "
+		
+	} else if (e.target.classList.contains("stop")) { // State:Stop, new->Save
+	
+		document.getElementById("button-start-stop").setAttribute("class", "button save");
+		document.getElementById("button-start-stop").innerText = "Save";
+		
+		var time = Date.now();
+		document.getElementById("helper-1").innerText = time;
+		
+	} else if (e.target.classList.contains("save")) { // State:Save, new->Start
+	
+		document.getElementById("button-start-stop").setAttribute("class", "button start");		
 		document.getElementById("button-start-stop").innerText = "Start";
+
+		document.getElementById("helper-1").innerText = "";
+		
 	}
 });
+
