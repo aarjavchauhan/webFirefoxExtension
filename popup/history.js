@@ -1,3 +1,16 @@
+function saveState(value) {
+  browser.storage.local.set({
+    state: value
+  });
+}
+
+function getState() {
+  var storageItem = browser.storage.local.get('state');
+  storageItem.then((res) => {
+  	newState(res.state)
+  });
+}
+
 // A useful way to extract the domain from a url.
 function get_hostname(url) {
   var a = document.createElement('a');
@@ -27,6 +40,9 @@ function getActiveTab() {
 // When the page is loaded find the current tab and then use that to query
 // the history.
 getActiveTab().then((tabs) => {
+
+  getState();
+
   var list = document.getElementById('history');
   var hostname = get_hostname(tabs[0].url);
 
@@ -64,27 +80,35 @@ var startTime = 0;
 document.addEventListener("click", (e) => {
 
 	if (e.target.classList.contains("start")) { // State:Start, new->Stop
-	
-		document.getElementById("button-start-stop").setAttribute("class", "button stop");
-		document.getElementById("button-start-stop").innerText = "Stop";
-
-		document.getElementById("helper-1").innerText = "Visited Websites : "
-		
+		newState("Stop");
+		saveState("Stop");
 	} else if (e.target.classList.contains("stop")) { // State:Stop, new->Save
-	
-		document.getElementById("button-start-stop").setAttribute("class", "button save");
-		document.getElementById("button-start-stop").innerText = "Save";
-		
-		var time = Date.now();
-		document.getElementById("helper-1").innerText = time;
-		
+		newState("Save");
+		saveState("Save");
 	} else if (e.target.classList.contains("save")) { // State:Save, new->Start
-	
-		document.getElementById("button-start-stop").setAttribute("class", "button start");		
-		document.getElementById("button-start-stop").innerText = "Start";
-
-		document.getElementById("helper-1").innerText = "";
-		
+		newState("Start");
+		saveState("Start");
 	}
 });
 
+function newState(newState) {
+
+	if (newState == "Stop") {
+	
+		document.getElementById("button-start-stop").setAttribute("class", "button stop");
+		document.getElementById("button-start-stop").innerText = "Stop";
+		document.getElementById("helper-1").innerText = "Visited Websites : "
+	} else if (newState == "Save") {
+	
+		document.getElementById("button-start-stop").setAttribute("class", "button save");
+		document.getElementById("button-start-stop").innerText = "Save";
+
+		var time = Date.now();
+		document.getElementById("helper-1").innerText = time;		
+	} else if (newState == "Start") {
+	
+		document.getElementById("button-start-stop").setAttribute("class", "button start");		
+		document.getElementById("button-start-stop").innerText = "Start";
+		document.getElementById("helper-1").innerText = "";	
+	}
+}

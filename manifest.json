@@ -16,7 +16,8 @@
   "permissions": [
   	"activeTab",
   	"history",
-    "tabs"
+    "tabs",
+    "storage"
   ],
   
   "background": {
