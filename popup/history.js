@@ -1,3 +1,10 @@
+class State {
+	constructor(state, time){
+		this.state = state;
+		this.time = time;
+	}
+}
+
 function saveState(value) {
   browser.storage.local.set({
     state: value
@@ -80,35 +87,36 @@ var startTime = 0;
 document.addEventListener("click", (e) => {
 
 	if (e.target.classList.contains("start")) { // State:Start, new->Stop
-		newState("Stop");
-		saveState("Stop");
+		newState(new State("Stop", Date.now()));
+		saveState(new State("Stop", Date.now()));
 	} else if (e.target.classList.contains("stop")) { // State:Stop, new->Save
-		newState("Save");
-		saveState("Save");
+		newState(new State("Save", 0));
+		saveState(new State("Save", 0));
 	} else if (e.target.classList.contains("save")) { // State:Save, new->Start
-		newState("Start");
-		saveState("Start");
+		newState(new State("Start", 0));
+		saveState(new State("Start", 0));
 	}
 });
 
 function newState(newState) {
 
-	if (newState == "Stop") {
+	if (newState.state == "Stop") {
 	
 		document.getElementById("button-start-stop").setAttribute("class", "button stop");
 		document.getElementById("button-start-stop").innerText = "Stop";
 		document.getElementById("helper-1").innerText = "Visited Websites : "
-	} else if (newState == "Save") {
+	} else if (newState.state == "Save") {
 	
 		document.getElementById("button-start-stop").setAttribute("class", "button save");
 		document.getElementById("button-start-stop").innerText = "Save";
 
 		var time = Date.now();
 		document.getElementById("helper-1").innerText = time;		
-	} else if (newState == "Start") {
+	} else if (newState.state == "Start") {
 	
 		document.getElementById("button-start-stop").setAttribute("class", "button start");		
 		document.getElementById("button-start-stop").innerText = "Start";
 		document.getElementById("helper-1").innerText = "";	
+		document.getElementById("start-time-label").innerText = "";
 	}
 }
