@@ -72,10 +72,15 @@ getActiveTab().then((tabs) => {
         var li = document.createElement('p');
         var a = document.createElement('a');
         var url = document.createTextNode(history.url);
+
+		var del = document.createElement('p');
+		del.innerText = k;
+        
         a.href = history.url;
         a.target = '_blank';
         a.appendChild(url);
         li.appendChild(a);
+        li.appendChild(del);
         list.appendChild(li);
       }
     }
@@ -100,8 +105,8 @@ document.addEventListener("click", (e) => {
 
 function newState(newState) {
 
+	document.getElementById("start-time-label").innerText = newState.time;
 	if (newState.state == "Stop") {
-	
 		document.getElementById("button-start-stop").setAttribute("class", "button stop");
 		document.getElementById("button-start-stop").innerText = "Stop";
 		document.getElementById("helper-1").innerText = "Visited Websites : "
