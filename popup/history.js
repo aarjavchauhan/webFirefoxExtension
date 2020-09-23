@@ -51,6 +51,7 @@ getActiveTab().then((tabs) => {
   getState();
 
   var list = document.getElementById('history');
+  var table = document.getElementById('history-table');
   var hostname = get_hostname(tabs[0].url);
 
   // Search for all history entries for the current windows domain.
@@ -66,22 +67,22 @@ getActiveTab().then((tabs) => {
     // What to show if there are no results.
     if (results.length < 1) {
       no_history(hostname);
+      
     } else {
+    
       for (var k in results) {
-        var history = results[k];
-        var li = document.createElement('p');
-        var a = document.createElement('a');
-        var url = document.createTextNode(history.url);
 
-		var del = document.createElement('p');
-		del.innerText = k;
-        
-        a.href = history.url;
-        a.target = '_blank';
-        a.appendChild(url);
-        li.appendChild(a);
-        li.appendChild(del);
-        list.appendChild(li);
+        var history = results[k];
+
+        var row = table.insertRow(k);
+        var deleteButton = row.insertCell(0);
+        var historyTitle = row.insertCell(1);
+
+        deleteButton.setAttribute("class", "button delete");
+        deleteButton.innerText = "Delete";
+        deleteButton.style.fontSize = "x-small";
+        deleteButton.id = "delete-button-" + k;
+        historyTitle.innerText = history.url;
       }
     }
   });
@@ -100,12 +101,14 @@ document.addEventListener("click", (e) => {
 	} else if (e.target.classList.contains("save")) { // State:Save, new->Start
 		newState(new State("Start", 0));
 		saveState(new State("Start", 0));
+	} else {
+		document.getElementById("start-time-label").innerText = e.target.id;
 	}
 });
 
 function newState(newState) {
 
-	document.getElementById("start-time-label").innerText = newState.time;
+	//document.getElementById("start-time-label").innerText = newState.time;
 	if (newState.state == "Stop") {
 		document.getElementById("button-start-stop").setAttribute("class", "button stop");
 		document.getElementById("button-start-stop").innerText = "Stop";
@@ -122,6 +125,6 @@ function newState(newState) {
 		document.getElementById("button-start-stop").setAttribute("class", "button start");		
 		document.getElementById("button-start-stop").innerText = "Start";
 		document.getElementById("helper-1").innerText = "";	
-		document.getElementById("start-time-label").innerText = "";
+		//document.getElementById("start-time-label").innerText = "";
 	}
 }

@@ -35,6 +35,10 @@ html, body {
 	background-color: #cddc39;
 }
 
+.delete {
+	background-color: #ab000d;
+}
+
 .row {
       width: 80%;
       background: gray;
