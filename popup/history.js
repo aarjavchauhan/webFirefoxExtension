@@ -5,11 +5,18 @@ class State {
 	}
 }
 
+class HistoryItem {
+	constructor(url, id) {
+		this.url = url;
+		this.id = id;
+	}
+}
+
 // Running list of history items
 var runningList;
 
 // Running list of entries not to show
-var deletedList;
+var deletedList = [];
 
 function saveState(value) {
   browser.storage.local.set({
@@ -83,6 +90,8 @@ getActiveTab().then((tabs) => {
         var history = results[k];
 
         var row = table.insertRow(k);
+        row.containerId = "row-container-" + k;
+        row.id = row.containerId;
         var deleteButton = row.insertCell(0);
         var historyTitle = row.insertCell(1);
 
@@ -90,9 +99,15 @@ getActiveTab().then((tabs) => {
         deleteButton.innerText = "Delete";
         deleteButton.style.fontSize = "x-small";
         deleteButton.id = "delete-button-" + k;
+        deleteButton.containerId = row.containerId;
+        deleteButton.deletedItem = k;
         deleteButton.index = k; // to reference for the running lists
         deleteButton.type = "delete";
+        deleteButton.url = history.url;
         historyTitle.innerText = history.url;
+        
+        var historyItem = new HistoryItem(history.url, row.containerId);
+        deleteButton.historyData = historyItem;
       }
     }
   });
@@ -114,15 +129,24 @@ document.addEventListener("click", (e) => {
 	} else if (e.target.type == "delete") {
 		// document.getElementById("start-time-label").innerText = e.target.id;
 		document.getElementById("start-time-label").innerText = e.target.index;
-		document.getElementById("helper-1").innerText = runningList[e.target.index].url;
+		//document.getElementById("helper-1").innerText = e.target.url;
+
+		//document.getElementById("helper-1").innerText = e.target.id;
 
 		// perform delete
+		deleteHistoryItem(e.target.url, e.target.containerId);
 	}
 });
 
-function deleteHistoryItem() {
-	// remove entry from list
+function deleteHistoryItem(url, id) {
+	// remove entry from list -- probs dont need to if added to deleted list + updated ui
 	// grey out item if ? deleted ?
+	// add to deleted list
+
+	deletedList.push(url);
+	document.getElementById("helper-1").innerText = id;
+	var toBeRemovedItem = document.getElementById(id);
+	toBeRemovedItem.remove();
 }
 
 function newState(newState) {
