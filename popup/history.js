@@ -5,6 +5,12 @@ class State {
 	}
 }
 
+// Running list of history items
+var runningList;
+
+// Running list of entries not to show
+var deletedList;
+
 function saveState(value) {
   browser.storage.local.set({
     state: value
@@ -69,6 +75,8 @@ getActiveTab().then((tabs) => {
       no_history(hostname);
       
     } else {
+
+	  runningList = results;
     
       for (var k in results) {
 
@@ -82,6 +90,8 @@ getActiveTab().then((tabs) => {
         deleteButton.innerText = "Delete";
         deleteButton.style.fontSize = "x-small";
         deleteButton.id = "delete-button-" + k;
+        deleteButton.index = k; // to reference for the running lists
+        deleteButton.type = "delete";
         historyTitle.innerText = history.url;
       }
     }
@@ -101,10 +111,19 @@ document.addEventListener("click", (e) => {
 	} else if (e.target.classList.contains("save")) { // State:Save, new->Start
 		newState(new State("Start", 0));
 		saveState(new State("Start", 0));
-	} else {
-		document.getElementById("start-time-label").innerText = e.target.id;
+	} else if (e.target.type == "delete") {
+		// document.getElementById("start-time-label").innerText = e.target.id;
+		document.getElementById("start-time-label").innerText = e.target.index;
+		document.getElementById("helper-1").innerText = runningList[e.target.index].url;
+
+		// perform delete
 	}
 });
+
+function deleteHistoryItem() {
+	// remove entry from list
+	// grey out item if ? deleted ?
+}
 
 function newState(newState) {
 
@@ -112,19 +131,20 @@ function newState(newState) {
 	if (newState.state == "Stop") {
 		document.getElementById("button-start-stop").setAttribute("class", "button stop");
 		document.getElementById("button-start-stop").innerText = "Stop";
-		document.getElementById("helper-1").innerText = "Visited Websites : "
+		//document.getElementById("helper-1").innerText = "Visited Websites : "
 	} else if (newState.state == "Save") {
 	
 		document.getElementById("button-start-stop").setAttribute("class", "button save");
 		document.getElementById("button-start-stop").innerText = "Save";
 
-		var time = Date.now();
-		document.getElementById("helper-1").innerText = time;		
+		//var time = Date.now();
+		//document.getElementById("helper-1").innerText = time;		
 	} else if (newState.state == "Start") {
 	
 		document.getElementById("button-start-stop").setAttribute("class", "button start");		
 		document.getElementById("button-start-stop").innerText = "Start";
-		document.getElementById("helper-1").innerText = "";	
+
+		//document.getElementById("helper-1").innerText = "";	
 		//document.getElementById("start-time-label").innerText = "";
 	}
 }
