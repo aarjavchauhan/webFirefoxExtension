@@ -31,10 +31,11 @@ function saveDeletedList() {
 
 function updateDeletedList() {
 	var storageItem = browser.storage.local.get('dList');
-	storageItem.then((res) => {
-		deletedList = res.dList.list;
-		document.getElementById("helper-1").innerText = deletedList;
-	});
+	return storageItem;
+	// storageItem.then((res) => {
+		// deletedList = res.dList.list;
+		// document.getElementById("helper-1").innerText = deletedList;
+	// });
 }
 
 function saveState(value) {
@@ -46,16 +47,9 @@ function saveState(value) {
 function getState() {
   var storageItem = browser.storage.local.get('state');
   storageItem.then((res) => {
+	//document.getElementById("helper-1").innerText = "Update to the state";
   	newState(res.state)
   });
-}
-
-// A useful way to extract the domain from a url.
-function get_hostname(url) {
-  var a = document.createElement('a');
-  a.href = url;
-  set_domain(a.hostname);
-  return a.hostname;
 }
 
 function set_domain(domain) {
@@ -76,18 +70,29 @@ function getActiveTab() {
   return browser.tabs.query({active: true, currentWindow: true});
 }
 
-// When the page is loaded find the current tab and then use that to query
-// the history.
-getActiveTab().then((tabs) => {
+Promise.all([updateDeletedList(), getActiveTab()]).then((values) => {
 
-  getState();
-  updateDeletedList();
+	deletedList = values[0].dList.list;
+ 	//document.getElementById("helper-1").innerText = "Got merged promise" + values[0].dList.list;
+
+ 	setupList(true);
+}).catch(error => {
+	document.getElementById("helper-1").innerText = "Merged but errored" + error;
+	setupList(false);
+});
+
+function setupList(withFilteredList) {
+
+	getState();
+ 	updateDeletedList();
 
   //a += 1;
 
   var list = document.getElementById('history');
   var table = document.getElementById('history-table');
-  var hostname = get_hostname(tabs[0].url);
+  //var hostname = get_hostname(tabs[0].url);
+
+	//document.getElementById("helper-1").innerText = "withFilteredList " + withFilteredList;
 
   // Search for all history entries for the current windows domain.
   // Because this could be a lot of entries, lets limit it to 5.
@@ -105,40 +110,79 @@ getActiveTab().then((tabs) => {
       
     } else {
 
-	  runningList = results;
+  	//runningList = results;
 
-//	document.getElementById("helper-1").innerText = "the size is " + deletedList.length;
-	  results.filter(item => !deletedList.includes(item.url)).forEach(function(currentValue, index, arr) {
-  			//document.getElementById("helper-1").innerText = "the index is " + index;
-	  });
-    
-      for (var k in results) {
+		//document.getElementById("helper-1").innerText = "withFilteredList " + withFilteredList;
+		
+		if (withFilteredList) {
+		 	var list = results.filter(item => !deletedList.includes(item.url));
+		 	showList(list);
+		 			/*.forEach(function(currentValue, k, arr) {
+		 		
+			 			// document.getElementById("helper-1").innerText = "the index is " + k;
 
-        var history = results[k];
+			 			var history = results[k];
+			 			s
+						var row = table.insertRow(k);
+						row.containerId = "row-container-" + k;
+						row.id = row.containerId;
+						var deleteButton = row.insertCell(0);
+						var historyTitle = row.insertCell(1);
 
-        var row = table.insertRow(k);
-        row.containerId = "row-container-" + k;
-        row.id = row.containerId;
-        var deleteButton = row.insertCell(0);
-        var historyTitle = row.insertCell(1);
+						deleteButton.setAttribute("class", "button delete");
+						deleteButton.innerText = "Delete";
+						deleteButton.style.fontSize = "x-small";
+						deleteButton.id = "delete-button-" + k;
+						deleteButton.containerId = row.containerId;
+						deleteButton.deletedItem = k;
+						deleteButton.index = k; // to reference for the running lists
+						deleteButton.type = "delete";
+						deleteButton.url = history.url;
+						historyTitle.innerText = history.url;
 
-        deleteButton.setAttribute("class", "button delete");
-        deleteButton.innerText = "Delete";
-        deleteButton.style.fontSize = "x-small";
-        deleteButton.id = "delete-button-" + k;
-        deleteButton.containerId = row.containerId;
-        deleteButton.deletedItem = k;
-        deleteButton.index = k; // to reference for the running lists
-        deleteButton.type = "delete";
-        deleteButton.url = history.url;
-        historyTitle.innerText = history.url;
-        
-        var historyItem = new HistoryItem(history.url, row.containerId);
-        deleteButton.historyData = historyItem;
-      }
+						var historyItem = new HistoryItem(history.url, row.containerId);
+						deleteButton.historyData = historyItem;
+		 });*/	
+		} else {
+			var list = results;
+			showList(list);
+		}
     }
   });
-});
+};
+
+function showList(results) {
+
+ 	var list = document.getElementById('history');
+  	var table = document.getElementById('history-table');
+
+	results.forEach(function(currentValue, k, arr) {
+			 		
+		//document.getElementById("helper-1").innerText = "the index is " + k;
+
+		var history = results[k];
+
+		var row = table.insertRow(k);
+		row.containerId = "row-container-" + k;
+		row.id = row.containerId;
+		var deleteButton = row.insertCell(0);
+		var historyTitle = row.insertCell(1);
+
+		deleteButton.setAttribute("class", "button delete");
+		deleteButton.innerText = "Delete";
+		deleteButton.style.fontSize = "x-small";
+		deleteButton.id = "delete-button-" + k;
+		deleteButton.containerId = row.containerId;
+		deleteButton.deletedItem = k;
+		deleteButton.index = k; // to reference for the running lists
+		deleteButton.type = "delete";
+		deleteButton.url = history.url;
+		historyTitle.innerText = history.url;
+
+		var historyItem = new HistoryItem(history.url, row.containerId);
+		deleteButton.historyData = historyItem;
+	});
+}
 
 var startTime = 0;
  
@@ -178,21 +222,21 @@ function deleteHistoryItem(url, id) {
 	saveDeletedList();
 }
 
-function newState(newState) {
+function newState(theNewState) {
 
 	//document.getElementById("start-time-label").innerText = newState.time;
-	if (newState.state == "Stop") {
+	if (theNewState.state == "Stop") {
 		document.getElementById("button-start-stop").setAttribute("class", "button stop");
 		document.getElementById("button-start-stop").innerText = "Stop";
 		//document.getElementById("helper-1").innerText = "Visited Websites : "
-	} else if (newState.state == "Save") {
+	} else if (theNewState.state == "Save") {
 	
 		document.getElementById("button-start-stop").setAttribute("class", "button save");
 		document.getElementById("button-start-stop").innerText = "Save";
 
 		//var time = Date.now();
 		//document.getElementById("helper-1").innerText = time;		
-	} else if (newState.state == "Start") {
+	} else if (theNewState.state == "Start") {
 	
 		document.getElementById("button-start-stop").setAttribute("class", "button start");		
 		document.getElementById("button-start-stop").innerText = "Start";
