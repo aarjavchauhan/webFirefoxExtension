@@ -12,11 +12,30 @@ class HistoryItem {
 	}
 }
 
+class DListHolder {
+	constructor(list) {
+		this.list = list;
+	}
+}
 // Running list of history items
 var runningList;
 
 // Running list of entries not to show
 var deletedList = [];
+
+function saveDeletedList() {
+	browser.storage.local.set({
+		dList: new DListHolder(deletedList)
+	});
+}
+
+function updateDeletedList() {
+	var storageItem = browser.storage.local.get('dList');
+	storageItem.then((res) => {
+		deletedList = res.dList.list;
+		document.getElementById("helper-1").innerText = deletedList;
+	});
+}
 
 function saveState(value) {
   browser.storage.local.set({
@@ -62,6 +81,9 @@ function getActiveTab() {
 getActiveTab().then((tabs) => {
 
   getState();
+  updateDeletedList();
+
+  //a += 1;
 
   var list = document.getElementById('history');
   var table = document.getElementById('history-table');
@@ -84,6 +106,11 @@ getActiveTab().then((tabs) => {
     } else {
 
 	  runningList = results;
+
+//	document.getElementById("helper-1").innerText = "the size is " + deletedList.length;
+	  results.filter(item => !deletedList.includes(item.url)).forEach(function(currentValue, index, arr) {
+  			//document.getElementById("helper-1").innerText = "the index is " + index;
+	  });
     
       for (var k in results) {
 
@@ -144,9 +171,11 @@ function deleteHistoryItem(url, id) {
 	// add to deleted list
 
 	deletedList.push(url);
-	document.getElementById("helper-1").innerText = id;
+	//document.getElementById("helper-1").innerText = deletedList.length;
 	var toBeRemovedItem = document.getElementById(id);
 	toBeRemovedItem.remove();
+	// deletedList = []; // to reset the deletedList stored.
+	saveDeletedList();
 }
 
 function newState(newState) {
