@@ -17,7 +17,8 @@
   	"activeTab",
   	"history",
     "tabs",
-    "storage"
+    "storage",
+    "downloads"
   ],
   
   "background": {
