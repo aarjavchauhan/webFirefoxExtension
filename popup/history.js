@@ -114,9 +114,9 @@ function showList(results) {
  	var list = document.getElementById('history');
   	var table = document.getElementById('history-table');
 
-	var test = ["one", "two", "three"];
+	//var test = results.map(it => JSON.stringify(it));
 
-	var blob = new Blob(test);
+	var blob = new Blob([results.map(it => JSON.stringify(it))]);
 	var url = window.URL.createObjectURL(blob);
 	log(url);
 
@@ -199,4 +199,3 @@ function newState(theNewState) {
 function log(text) {
 	document.getElementById("helper-1").innerText = text;
 }
-
