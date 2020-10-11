@@ -87,15 +87,15 @@ Promise.all([
 	startTime = currentState.startTime;
 	//log2(JSON.stringify(values[2].state.time));
 	newState(currentState);
- 	setupList(true);
+ 	setupList();
 }).catch(error => {
 	if (currentState == null) {
 		currentState = new State("Start", 0);
 	}
-	setupList(false);
+	setupList();
 });
 
-function setupList(withFilteredList) {
+function setupList() {
 	
  	var list = document.getElementById('history');
  	var table = document.getElementById('history-table');
@@ -181,6 +181,11 @@ document.addEventListener("click", (e) => {
 		// perform download on save
 		download();
 		
+	} else if (e.target.classList.contains("discard")) {
+	
+		newState(new State("Start", 0, 0));
+		saveState(new State("Start", 0, 0));
+				
 	} else if (e.target.type == "delete") {
 		//document.getElementById("start-time-label").innerText = e.target.index;
 		// perform delete
@@ -200,19 +205,23 @@ function deleteHistoryItem(url, id) {
 function newState(theNewState) {
 
 	if (theNewState.state == "Stop") {
-	
+
+		document.getElementById("button-start-stop").style.display = "block";
 		document.getElementById("button-start-stop").setAttribute("class", "button stop");
 		document.getElementById("button-start-stop").innerText = "Stop";
+		document.getElementById("save-or-discard").style.display = "none";
 		
 	} else if (theNewState.state == "Save") {
-	
-		document.getElementById("button-start-stop").setAttribute("class", "button save");
-		document.getElementById("button-start-stop").innerText = "Save";
+
+		document.getElementById("button-start-stop").style.display = "none";
+		document.getElementById("save-or-discard").style.display = "block";
 	
 	} else if (theNewState.state == "Start") {
-	
+
+		document.getElementById("button-start-stop").style.display = "block";	
 		document.getElementById("button-start-stop").setAttribute("class", "button start");		
 		document.getElementById("button-start-stop").innerText = "Start";
+		document.getElementById("save-or-discard").style.display = "none";
 		//document.getElementById("start-time-label").innerText = "";
 	}
 }
@@ -220,8 +229,6 @@ function newState(theNewState) {
 function download() {
 	var blob = new Blob([JSON.stringify(runningList)], { type: "application/json" });
 	var url = window.URL.createObjectURL(blob);
-	//log(url);
-	//document.getElementById("start-time-label").innerText = "";
 	browser.downloads.download({url: url, filename: "data1.json"})
 	log("Successfully saved file to the downloads folder");
 }
