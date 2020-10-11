@@ -1,9 +1,10 @@
 class State {
 	// state is string, should be either Start/Stop/Save
 	// time is start time of session in long. 0 if none.
-	constructor(state, time){
+	constructor(state, startTime, stopTime){
 		this.state = state;
-		this.time = time;
+		this.startTime = startTime;
+		this.stopTime = stopTime;
 	}
 }
 
@@ -25,9 +26,6 @@ var runningList = [];
 
 // Running list of entries not to show
 var deletedList = [];
-
-// Start time for current session
-var startTime = 0;
 
 // keep track of current state
 var currentState;
@@ -86,7 +84,7 @@ Promise.all([
 		deletedList = values[0].dList.list;	
 	}
 	currentState = values[2].state;
-	startTime = currentState.time;
+	startTime = currentState.startTime;
 	//log2(JSON.stringify(values[2].state.time));
 	newState(currentState);
  	setupList(true);
@@ -105,34 +103,30 @@ function setupList(withFilteredList) {
    	if (currentState.state == "Start") {
     	log2("Click Start to begin recording the websites you websites.");
     } else {
-   		var searchingHistory = browser.history.search({text: "http", 
-     		startTime: startTime,
-     		endTime: Date.now(),
-     		maxResults: 50
-		});
-     
-  searchingHistory.then((results) => {
-    // What to show if there are no results.
 
-    if (results.length < 1) {
-    	log("Start browsing !")
-      
-    } else {
-		var list = results.filter(item => !deletedList.includes(item.url));
-		showList(list);
-		/*
-		if (withFilteredList) {
-		 	var list = results.filter(item => !deletedList.includes(item.url));
-		 	showList(list);
-		} else {
-			var list = results;
-			showList(list);
-		}
-		*/
-    }
-  });	
+    	// if no stop time we're currently recording, else use the saved stop time.
+   		var stopTime = (currentState.stopTime == null || currentState.stopTime == 0 ? Date.now() : currentState.stopTime);
+	  	searchHistoryFromEndDate(stopTime).then((results) => {
+	    // What to show if there are no results.
+
+		    if (results.length < 1) {
+		    	log("Start browsing !");
+		    } else {
+				var list = results.filter(item => !deletedList.includes(item.url));
+				showList(list);
+		    }
+  		});	
     }
 };
+
+function searchHistoryFromEndDate(stopTime) {
+	return searchingHistory = browser.history.search({
+				text: "http", 
+	     		startTime: currentState.startTime,
+	     		endTime: stopTime,
+	     		maxResults: 50
+			});
+}
 
 function showList(results) {
 
@@ -171,18 +165,18 @@ document.addEventListener("click", (e) => {
 
 	if (e.target.classList.contains("start")) { // State:Start, new->Stop
 	
-		newState(new State("Stop", Date.now()));
-		saveState(new State("Stop", Date.now()));
+		newState(new State("Stop", Date.now(), 0));
+		saveState(new State("Stop", Date.now(), 0));
 		
 	} else if (e.target.classList.contains("stop")) { // State:Stop, new->Save
 	
-		newState(new State("Save", startTime));
-		saveState(new State("Save", startTime));
+		newState(new State("Save", currentState.startTime, Date.now()));
+		saveState(new State("Save", currentState.startTime, Date.now()));
 		
 	} else if (e.target.classList.contains("save")) { // State:Save, new->Start
 	
-		newState(new State("Start", 0));
-		saveState(new State("Start", 0));
+		newState(new State("Start", 0, 0));
+		saveState(new State("Start", 0, 0));
 
 		// perform download on save
 		download();
