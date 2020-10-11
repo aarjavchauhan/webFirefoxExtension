@@ -19,7 +19,7 @@ class DListHolder {
 }
 
 // Running list of history items
-var runningList;
+var runningList = [];
 
 // Running list of entries not to show
 var deletedList = [];
@@ -95,8 +95,6 @@ function setupList(withFilteredList) {
       no_history(hostname);
       
     } else {
-
-  	//runningList = results;
 		
 		if (withFilteredList) {
 		 	var list = results.filter(item => !deletedList.includes(item.url));
@@ -114,13 +112,7 @@ function showList(results) {
  	var list = document.getElementById('history');
   	var table = document.getElementById('history-table');
 
-	//var test = results.map(it => JSON.stringify(it));
-
-	var blob = new Blob([results.map(it => JSON.stringify(it))]);
-	var url = window.URL.createObjectURL(blob);
-	log(url);
-
-	//browser.downloads.download({url: url})
+  	runningList	= results;
 	
 	results.forEach(function(currentValue, k, arr) {
 			 		
@@ -161,6 +153,9 @@ document.addEventListener("click", (e) => {
 	} else if (e.target.classList.contains("save")) { // State:Save, new->Start
 		newState(new State("Start", 0));
 		saveState(new State("Start", 0));
+
+		// perform download on save
+		download();
 	} else if (e.target.type == "delete") {
 		document.getElementById("start-time-label").innerText = e.target.index;
 
@@ -181,8 +176,10 @@ function deleteHistoryItem(url, id) {
 function newState(theNewState) {
 
 	if (theNewState.state == "Stop") {
+	
 		document.getElementById("button-start-stop").setAttribute("class", "button stop");
 		document.getElementById("button-start-stop").innerText = "Stop";
+		
 	} else if (theNewState.state == "Save") {
 	
 		document.getElementById("button-start-stop").setAttribute("class", "button save");
@@ -194,6 +191,15 @@ function newState(theNewState) {
 		document.getElementById("button-start-stop").innerText = "Start";
 		//document.getElementById("start-time-label").innerText = "";
 	}
+}
+
+function download() {
+	var blob = new Blob([JSON.stringify(runningList)], { type: "application/json" });
+	var url = window.URL.createObjectURL(blob);
+	//log(url);
+	//document.getElementById("start-time-label").innerText = "";
+	browser.downloads.download({url: url, filename: "data1.json"})
+	log("Successfully saved file to the downloads folder");
 }
 
 function log(text) {
