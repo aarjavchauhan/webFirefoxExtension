@@ -1,4 +1,6 @@
 class State {
+	// state is string, should be either Start/Stop/Save
+	// time is start time of session in long. 0 if none.
 	constructor(state, time){
 		this.state = state;
 		this.time = time;
@@ -24,6 +26,12 @@ var runningList = [];
 // Running list of entries not to show
 var deletedList = [];
 
+// Start time for current session
+var startTime = 0;
+
+// keep track of current state
+var currentState;
+
 function saveDeletedList() {
 	browser.storage.local.set({
 		dList: new DListHolder(deletedList)
@@ -43,9 +51,10 @@ function saveState(value) {
 
 function getState() {
   var storageItem = browser.storage.local.get('state');
-  storageItem.then((res) => {
-  	newState(res.state)
-  });
+  return storageItem;
+  // storageItem.then((res) => {
+  	// newState(res.state)
+  // });
 }
 
 function set_domain(domain) {
@@ -66,36 +75,52 @@ function getActiveTab() {
   return browser.tabs.query({active: true, currentWindow: true});
 }
 
-Promise.all([updateDeletedList(), getActiveTab()]).then((values) => {
+// Start
+Promise.all([
+	updateDeletedList(), 
+	getActiveTab(),
+	getState()
+]).then((values) => {
 
-	deletedList = values[0].dList.list;
+	if (values[0].dList != null) {
+		deletedList = values[0].dList.list;	
+	}
+	currentState = values[2].state;
+	startTime = currentState.time;
+	//log2(JSON.stringify(values[2].state.time));
+	newState(currentState);
  	setupList(true);
 }).catch(error => {
+	if (currentState == null) {
+		currentState = new State("Start", 0);
+	}
 	setupList(false);
 });
 
 function setupList(withFilteredList) {
+	
+ 	var list = document.getElementById('history');
+ 	var table = document.getElementById('history-table');
 
-	getState();
- 	updateDeletedList();
-
-  var list = document.getElementById('history');
-  var table = document.getElementById('history-table');
-
-  var searchingHistory = browser.history.search(
-    {text: "http", 
-     startTime: startTime,
-     endTime: Date.now(),
-     maxResults: 50
-     });
+   	if (currentState.state == "Start") {
+    	log2("Click Start to begin recording the websites you websites.");
+    } else {
+   		var searchingHistory = browser.history.search({text: "http", 
+     		startTime: startTime,
+     		endTime: Date.now(),
+     		maxResults: 50
+		});
      
   searchingHistory.then((results) => {
     // What to show if there are no results.
+
     if (results.length < 1) {
-      no_history(hostname);
+    	log("Start browsing !")
       
     } else {
-		
+		var list = results.filter(item => !deletedList.includes(item.url));
+		showList(list);
+		/*
 		if (withFilteredList) {
 		 	var list = results.filter(item => !deletedList.includes(item.url));
 		 	showList(list);
@@ -103,8 +128,10 @@ function setupList(withFilteredList) {
 			var list = results;
 			showList(list);
 		}
+		*/
     }
-  });
+  });	
+    }
 };
 
 function showList(results) {
@@ -139,26 +166,29 @@ function showList(results) {
 		deleteButton.historyData = historyItem;
 	});
 }
-
-var startTime = 0;
  
 document.addEventListener("click", (e) => {
 
 	if (e.target.classList.contains("start")) { // State:Start, new->Stop
+	
 		newState(new State("Stop", Date.now()));
 		saveState(new State("Stop", Date.now()));
+		
 	} else if (e.target.classList.contains("stop")) { // State:Stop, new->Save
-		newState(new State("Save", 0));
-		saveState(new State("Save", 0));
+	
+		newState(new State("Save", startTime));
+		saveState(new State("Save", startTime));
+		
 	} else if (e.target.classList.contains("save")) { // State:Save, new->Start
+	
 		newState(new State("Start", 0));
 		saveState(new State("Start", 0));
 
 		// perform download on save
 		download();
+		
 	} else if (e.target.type == "delete") {
-		document.getElementById("start-time-label").innerText = e.target.index;
-
+		//document.getElementById("start-time-label").innerText = e.target.index;
 		// perform delete
 		deleteHistoryItem(e.target.url, e.target.containerId);
 	}
@@ -204,4 +234,8 @@ function download() {
 
 function log(text) {
 	document.getElementById("helper-1").innerText = text;
+}
+
+function log2(text) {
+	document.getElementById("start-time-label").innerText = text;
 }
