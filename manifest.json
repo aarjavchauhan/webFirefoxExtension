@@ -1,15 +1,15 @@
 {
-  "description": "Demonstrating webRequests",
+  "description": "Web experience research",
   "manifest_version": 2,
-  "name": "jFox",
+  "name": "dotOrg",
   "version": "1.0",
   "icons": {
-    "48": "icons/beasts-48.png"
+    "64": "icons/network-64.png"
   },
 
   "browser_action": {
-    "default_icon": "icons/beasts-32.png",
-    "default_title": "lPhant",
+    "default_icon": "icons/network-32.png",
+    "default_title": "dotOrg",
     "default_popup": "popup/jfox_ui.html"
   },
 
